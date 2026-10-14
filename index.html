@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f7fb">
+    <title>TransWork · Agent 工作台</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        color: #17243a;
+        background: #f5f7fb;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        --muted: #78859a;
+        --line: #e9edf4;
+        --blue: #5269e8;
+        --navy: #18243a;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; min-width: 320px; }
+      button, input, select { font: inherit; }
+      button { cursor: pointer; }
+      .app { min-height: 100vh; }
+      .sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        z-index: 2;
+        display: flex;
+        width: 248px;
+        flex-direction: column;
+        padding: 26px 17px 18px;
+        color: #dbe2f0;
+        background: var(--navy);
+      }
+      .brand { display: flex; align-items: center; gap: 11px; padding: 0 9px 30px; }
+      .brand-mark {
+        display: grid;
+        width: 35px;
+        height: 35px;
+        place-items: center;
+        border-radius: 11px;
+        color: white;
+        background: linear-gradient(145deg, #8291ff, #596be9);
+        font-size: 18px;
+        font-weight: 800;
+      }
+      .brand-name { font-size: 17px; font-weight: 700; letter-spacing: -.3px; }
+      .brand-caption { margin-top: 3px; color: #8591a7; font-size: 10px; letter-spacing: 1.3px; }
+      .workspace-label { padding: 0 11px 9px; color: #8490a6; font-size: 10px; letter-spacing: 1.2px; }
+      .nav { display: grid; gap: 5px; }
+      .nav a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 12px;
+        border-radius: 8px;
+        color: #aeb8cb;
+        font-size: 13px;
+        text-decoration: none;
+        transition: background .18s, color .18s;
+      }
+      .nav a:hover, .nav a.active { color: white; background: #2a3852; }
+      .nav-icon { width: 19px; text-align: center; font-size: 16px; }
+      .sidebar-spacer { flex: 1; }
+      .workspace-card { padding: 15px; border: 1px solid #34415a; border-radius: 10px; background: #202d44; }
+      .workspace-card strong { display: block; color: white; font-size: 12px; }
+      .workspace-card span { display: block; margin-top: 6px; color: #9ca9bc; font-size: 11px; line-height: 1.6; }
+      .profile { display: flex; align-items: center; gap: 10px; padding: 18px 7px 0; }
+      .avatar { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 50%; color: #4254be; background: #dfe4ff; font-size: 12px; font-weight: 700; }
+      .profile-name { color: #ecf0f8; font-size: 12px; }
+      .profile-role { margin-top: 4px; color: #8996ac; font-size: 10px; }
+
+      .main { margin-left: 248px; padding: 0 42px 54px; }
+      .topbar { display: flex; min-height: 74px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+      .breadcrumb { color: var(--muted); font-size: 12px; }
+      .breadcrumb strong { color: #27364d; font-weight: 600; }
+      .top-actions { display: flex; align-items: center; gap: 16px; }
+      .today { color: var(--muted); font-size: 11px; }
+      .icon-button { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 9px; color: #66748a; background: white; }
+      .page-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; padding: 29px 0 23px; }
+      .eyebrow { margin-bottom: 9px; color: var(--blue); font-size: 10px; font-weight: 700; letter-spacing: 1.4px; }
+      h1 { margin: 0; color: #1b2940; font-size: 25px; letter-spacing: -.8px; }
+      .subtitle { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+      .primary-button, .secondary-button {
+        display: inline-flex;
+        min-height: 38px;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 0 14px;
+        border: 0;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .primary-button { color: white; background: var(--blue); box-shadow: 0 4px 10px #5269e82b; }
+      .primary-button:hover { background: #4359d8; }
+      .secondary-button { border: 1px solid var(--line); color: #59677d; background: white; }
+      .section { scroll-margin-top: 20px; margin-top: 18px; }
+      .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+      .metric, .panel { border: 1px solid var(--line); border-radius: 11px; background: white; box-shadow: 0 3px 12px #1b294008; }
+      .metric { padding: 17px 18px; }
+      .metric-label { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 11px; }
+      .metric-icon { display: grid; width: 29px; height: 29px; place-items: center; border-radius: 8px; color: #586be2; background: #eef0ff; font-size: 14px; }
+      .metric-value { margin-top: 12px; color: #1d2b42; font-size: 25px; font-weight: 700; letter-spacing: -.7px; }
+      .metric-foot { margin-top: 5px; color: #8a96a8; font-size: 10px; }
+      .positive { color: #2f9b74; font-weight: 600; }
+      .content-grid { display: grid; grid-template-columns: minmax(0, 1.48fr) minmax(280px, .92fr); gap: 17px; }
+      .panel { padding: 18px 19px; }
+      .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+      .panel-title { margin: 0; font-size: 13px; font-weight: 700; }
+      .panel-subtitle { margin-top: 5px; color: var(--muted); font-size: 10px; }
+      .text-link { border: 0; color: var(--blue); background: none; font-size: 10px; text-decoration: none; }
+      .agent-list { display: grid; }
+      .agent-row { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 11px; padding: 12px 0; border-top: 1px solid #f0f2f7; }
+      .agent-avatar { display: grid; width: 35px; height: 35px; place-items: center; border-radius: 10px; font-size: 15px; }
+      .agent-name { color: #27364d; font-size: 11px; font-weight: 650; }
+      .agent-meta { margin-top: 5px; color: var(--muted); font-size: 10px; }
+      .agent-status { display: flex; align-items: center; gap: 5px; color: #738096; font-size: 9px; white-space: nowrap; }
+      .dot { width: 6px; height: 6px; border-radius: 50%; background: #39b78b; }
+      .dot.idle { background: #c1c9d5; }
+      .activity-list { display: grid; gap: 15px; }
+      .activity { display: grid; grid-template-columns: 23px minmax(0, 1fr); gap: 9px; }
+      .activity-icon { display: grid; width: 23px; height: 23px; place-items: center; border-radius: 7px; color: #5369e4; background: #f0f1ff; font-size: 11px; }
+      .activity-text { color: #536177; font-size: 10px; line-height: 1.65; }
+      .activity-text strong { color: #26354c; font-weight: 650; }
+      .activity-time { margin-top: 3px; color: #9aa4b3; font-size: 9px; }
+      .workflow-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+      .workflow-card { padding: 14px; border: 1px solid #edf0f6; border-radius: 9px; background: #fcfdff; }
+      .workflow-top { display: flex; align-items: center; justify-content: space-between; }
+      .workflow-name { color: #2a3950; font-size: 11px; font-weight: 650; }
+      .workflow-tag { padding: 4px 7px; border-radius: 20px; color: #3b9676; background: #eaf8f2; font-size: 9px; }
+      .workflow-desc { min-height: 31px; margin: 9px 0; color: #8490a2; font-size: 10px; line-height: 1.6; }
+      .workflow-progress { height: 4px; overflow: hidden; border-radius: 5px; background: #edf0f5; }
+      .workflow-progress span { display: block; height: 100%; border-radius: inherit; background: #6c7cf0; }
+      .workflow-foot { display: flex; justify-content: space-between; margin-top: 8px; color: #8b97a8; font-size: 9px; }
+      .resource-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 17px; }
+      .skill-list, .knowledge-list { display: grid; gap: 9px; }
+      .skill-item, .knowledge-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid #f0f2f7; }
+      .resource-icon { display: grid; width: 30px; height: 30px; flex: 0 0 auto; place-items: center; border-radius: 8px; color: #6a70d9; background: #f0f0ff; font-size: 12px; }
+      .resource-name { color: #344158; font-size: 10px; font-weight: 600; }
+      .resource-meta { margin-top: 4px; color: #8d98a8; font-size: 9px; }
+      .resource-count { margin-left: auto; color: #8b96a8; font-size: 9px; white-space: nowrap; }
+      .task-table { width: 100%; border-collapse: collapse; text-align: left; }
+      .task-table th { padding: 0 8px 10px; color: #8b96a8; font-size: 9px; font-weight: 500; }
+      .task-table td { padding: 11px 8px; border-top: 1px solid #f0f2f7; color: #5e6a7d; font-size: 10px; }
+      .task-table td:first-child { color: #2d3b51; font-weight: 600; }
+      .task-owner { display: inline-flex; align-items: center; gap: 6px; }
+      .mini-avatar { display: grid; width: 20px; height: 20px; place-items: center; border-radius: 6px; background: #eef0ff; font-size: 10px; }
+      .status-pill { padding: 4px 7px; border-radius: 15px; color: #438e77; background: #eaf7f1; font-size: 9px; white-space: nowrap; }
+      .status-pill.pending { color: #a6772c; background: #fff5df; }
+      .empty-row { display: none; }
+      .footer { padding: 27px 0 0; color: #a0a9b7; font-size: 9px; text-align: center; }
+      dialog { width: min(420px, calc(100% - 32px)); padding: 0; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 22px 70px #18243a30; }
+      dialog::backdrop { background: #18243a70; backdrop-filter: blur(2px); }
+      .dialog-content { padding: 23px; }
+      .dialog-content h2 { margin: 0; font-size: 17px; }
+      .dialog-content p { margin: 7px 0 20px; color: var(--muted); font-size: 11px; }
+      .field { display: grid; gap: 7px; margin: 14px 0; }
+      .field label { color: #526077; font-size: 10px; font-weight: 600; }
+      .field input, .field select { width: 100%; height: 38px; padding: 0 10px; border: 1px solid #e3e8f0; border-radius: 7px; outline-color: #8794f4; color: #344158; background: white; font-size: 11px; }
+      .dialog-actions { display: flex; justify-content: end; gap: 8px; margin-top: 21px; }
+      .toast { position: fixed; right: 24px; bottom: 22px; z-index: 4; padding: 11px 15px; border-radius: 8px; color: white; background: #26354c; box-shadow: 0 5px 18px #18243a30; font-size: 11px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: .2s; }
+      .toast.visible { opacity: 1; transform: translateY(0); }
+
+      @media (max-width: 1050px) {
+        .main { padding-right: 25px; padding-left: 25px; }
+        .sidebar { width: 215px; }
+        .main { margin-left: 215px; }
+        .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 760px) {
+        .sidebar { position: static; width: auto; height: auto; padding: 13px 16px; }
+        .brand { padding: 0 3px 13px; }
+        .workspace-label, .sidebar-spacer, .workspace-card, .profile { display: none; }
+        .nav { display: flex; overflow-x: auto; gap: 4px; }
+        .nav a { flex: 0 0 auto; padding: 8px 10px; font-size: 11px; }
+        .nav-icon { width: auto; }
+        .main { margin: 0; padding: 0 16px 35px; }
+        .topbar { min-height: 52px; }
+        .today { display: none; }
+        .page-heading { align-items: start; flex-direction: column; padding: 22px 0 17px; }
+        h1 { font-size: 22px; }
+        .metrics { gap: 9px; }
+        .metric { padding: 13px; }
+        .metric-value { font-size: 22px; }
+        .content-grid, .resource-grid { grid-template-columns: 1fr; }
+        .workflow-grid { grid-template-columns: 1fr; }
+        .workflow-desc { min-height: 0; }
+        .panel { padding: 15px; }
+        .task-table th, .task-table td { padding-right: 4px; padding-left: 4px; font-size: 9px; }
+        .hide-mobile { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar" aria-label="工作台导航">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">T</div>
+          <div><div class="brand-name">TransWork</div><div class="brand-caption">AGENT WORKSPACE</div></div>
+        </div>
+        <div class="workspace-label">工作空间</div>
+        <nav class="nav">
+          <a class="active" href="#overview"><span class="nav-icon">◫</span>工作总览</a>
+          <a href="#agents"><span class="nav-icon">◇</span>智能体团队</a>
+          <a href="#workflows"><span class="nav-icon">⤳</span>任务流程</a>
+          <a href="#skills"><span class="nav-icon">⌘</span>技能中心</a>
+          <a href="#knowledge"><span class="nav-icon">▤</span>企业知识</a>
+          <a href="#tasks"><span class="nav-icon">☷</span>任务记录</a>
+        </nav>
+        <div class="sidebar-spacer"></div>
+        <div class="workspace-card">
+          <strong>星河科技 · 企业空间</strong>
+          <span>你的团队、知识与工作流程，安全地协同在一起。</span>
+        </div>
+        <div class="profile">
+          <div class="avatar">林</div>
+          <div><div class="profile-name">林知远</div><div class="profile-role">空间管理员</div></div>
+        </div>
+      </aside>
+
+      <main class="main" id="overview">
+        <header class="topbar">
+          <div class="breadcrumb">星河科技 <span aria-hidden="true"> / </span> <strong>工作总览</strong></div>
+          <div class="top-actions"><span class="today">周三 · 2026年10月14日</span><button class="icon-button" aria-label="通知">♧</button></div>
+        </header>
+        <section class="page-heading">
+          <div><div class="eyebrow">YOUR AGENT WORKSPACE</div><h1>让智能体，成为团队的一部分</h1><p class="subtitle">把企业知识、专业技能与日常任务连接起来，让工作持续向前。</p></div>
+          <button class="primary-button" id="open-task">＋ 创建任务</button>
+        </section>
+
+        <section class="metrics" aria-label="工作概况">
+          <article class="metric"><div class="metric-label">已部署智能体<span class="metric-icon">◇</span></div><div class="metric-value">08</div><div class="metric-foot"><span class="positive">+2</span> 本月新增</div></article>
+          <article class="metric"><div class="metric-label">本周完成任务<span class="metric-icon">✓</span></div><div class="metric-value">126</div><div class="metric-foot"><span class="positive">↑ 18%</span> 较上周</div></article>
+          <article class="metric"><div class="metric-label">可用企业技能<span class="metric-icon">⌘</span></div><div class="metric-value">24</div><div class="metric-foot">已连接 6 个业务系统</div></article>
+          <article class="metric"><div class="metric-label">知识库资料<span class="metric-icon">▤</span></div><div class="metric-value">1,842</div><div class="metric-foot">最近同步于 12 分钟前</div></article>
+        </section>
+
+        <section class="section content-grid">
+          <article class="panel" id="agents">
+            <div class="panel-heading"><div><h2 class="panel-title">智能体团队</h2><div class="panel-subtitle">分工明确，协作完成真实业务任务</div></div><a class="text-link" href="#skills">管理团队 →</a></div>
+            <div class="agent-list">
+              <div class="agent-row"><div class="agent-avatar" style="background:#eef0ff">✦</div><div><div class="agent-name">市场洞察员</div><div class="agent-meta">市场部 · 竞品分析、行业研究</div></div><div class="agent-status"><span class="dot"></span>执行中</div></div>
+              <div class="agent-row"><div class="agent-avatar" style="background:#e8f7f2">▧</div><div><div class="agent-name">客户成功顾问</div><div class="agent-meta">客户成功 · 客户跟进、需求归纳</div></div><div class="agent-status"><span class="dot"></span>执行中</div></div>
+              <div class="agent-row"><div class="agent-avatar" style="background:#fff3e7">⌁</div><div><div class="agent-name">数据分析师</div><div class="agent-meta">数据团队 · 报表分析、异常监测</div></div><div class="agent-status"><span class="dot idle"></span>待命</div></div>
+              <div class="agent-row"><div class="agent-avatar" style="background:#fcecf2">✎</div><div><div class="agent-name">品牌内容编辑</div><div class="agent-meta">品牌部 · 内容撰写、素材校验</div></div><div class="agent-status"><span class="dot idle"></span>待命</div></div>
+            </div>
+          </article>
+          <article class="panel">
+            <div class="panel-heading"><div><h2 class="panel-title">团队动态</h2><div class="panel-subtitle">智能体与成员的最新协作</div></div><button class="text-link" type="button" data-toast="已显示最新动态">查看全部 →</button></div>
+            <div class="activity-list">
+              <div class="activity"><div class="activity-icon">✓</div><div><div class="activity-text"><strong>市场洞察员</strong>完成了「Q4竞品动态周报」</div><div class="activity-time">10:42 · 产出已提交审核</div></div></div>
+              <div class="activity"><div class="activity-icon">↗</div><div><div class="activity-text"><strong>客户成功顾问</strong>整理了 12 条客户访谈记录</div><div class="activity-time">10:18 · 已同步至客户知识库</div></div></div>
+              <div class="activity"><div class="activity-icon">＋</div><div><div class="activity-text"><strong>林知远</strong>更新了「品牌内容规范」</div><div class="activity-time">09:56 · 企业知识库</div></div></div>
+              <div class="activity"><div class="activity-icon">⤳</div><div><div class="activity-text"><strong>数据分析师</strong>开始执行「月度经营数据汇总」</div><div class="activity-time">09:30 · 任务流程已触发</div></div></div>
+            </div>
+          </article>
+        </section>
+
+        <section class="section panel" id="workflows">
+          <div class="panel-heading"><div><h2 class="panel-title">常用任务流程</h2><div class="panel-subtitle">将重复工作沉淀为团队可复用的流程</div></div><button class="text-link" type="button" data-toast="流程管理即将开放">管理流程 →</button></div>
+          <div class="workflow-grid">
+            <article class="workflow-card"><div class="workflow-top"><div class="workflow-name">竞品情报周报</div><span class="workflow-tag">运行中</span></div><div class="workflow-desc">收集动态 → 提炼变化 → 生成周报 → 人工审核</div><div class="workflow-progress"><span style="width:72%"></span></div><div class="workflow-foot"><span>市场洞察员 · 4 个步骤</span><span>72%</span></div></article>
+            <article class="workflow-card"><div class="workflow-top"><div class="workflow-name">客户访谈归档</div><span class="workflow-tag">已启用</span></div><div class="workflow-desc">导入记录 → 归纳需求 → 匹配知识 → 同步客户档案</div><div class="workflow-progress"><span style="width:100%"></span></div><div class="workflow-foot"><span>客户成功顾问 · 4 个步骤</span><span>今日 8 次</span></div></article>
+            <article class="workflow-card"><div class="workflow-top"><div class="workflow-name">月度经营复盘</div><span class="workflow-tag">已启用</span></div><div class="workflow-desc">汇总业务数据 → 分析趋势 → 输出复盘材料</div><div class="workflow-progress"><span style="width:35%"></span></div><div class="workflow-foot"><span>数据分析师 · 3 个步骤</span><span>35%</span></div></article>
+          </div>
+        </section>
+
+        <section class="section resource-grid">
+          <article class="panel" id="skills">
+            <div class="panel-heading"><div><h2 class="panel-title">团队技能</h2><div class="panel-subtitle">经授权的工具与业务能力</div></div><button class="text-link" type="button" data-toast="技能中心即将开放">技能中心 →</button></div>
+            <div class="skill-list">
+              <div class="skill-item"><div class="resource-icon">⌕</div><div><div class="resource-name">网页信息检索</div><div class="resource-meta">搜索 · 信息提取</div></div><span class="resource-count">4 个智能体</span></div>
+              <div class="skill-item"><div class="resource-icon">▦</div><div><div class="resource-name">经营数据分析</div><div class="resource-meta">数据查询 · 图表生成</div></div><span class="resource-count">2 个智能体</span></div>
+              <div class="skill-item"><div class="resource-icon">↗</div><div><div class="resource-name">CRM 客户管理</div><div class="resource-meta">客户查询 · 记录同步</div></div><span class="resource-count">3 个智能体</span></div>
+            </div>
+          </article>
+          <article class="panel" id="knowledge">
+            <div class="panel-heading"><div><h2 class="panel-title">企业知识</h2><div class="panel-subtitle">智能体工作的组织上下文</div></div><button class="text-link" type="button" data-toast="知识库管理即将开放">知识库 →</button></div>
+            <div class="knowledge-list">
+              <div class="knowledge-item"><div class="resource-icon">▤</div><div><div class="resource-name">产品与解决方案</div><div class="resource-meta">产品部 · 3 分钟前同步</div></div><span class="resource-count">428 份</span></div>
+              <div class="knowledge-item"><div class="resource-icon">▤</div><div><div class="resource-name">品牌内容规范</div><div class="resource-meta">品牌部 · 今日更新</div></div><span class="resource-count">86 份</span></div>
+              <div class="knowledge-item"><div class="resource-icon">▤</div><div><div class="resource-name">客户成功手册</div><div class="resource-meta">客户成功 · 昨日同步</div></div><span class="resource-count">213 份</span></div>
+            </div>
+          </article>
+        </section>
+
+        <section class="section panel" id="tasks">
+          <div class="panel-heading"><div><h2 class="panel-title">最近任务</h2><div class="panel-subtitle">任务有负责人、有进度，也有可追溯的结果</div></div><button class="text-link" type="button" data-toast="已显示最近任务">全部任务 →</button></div>
+          <div style="overflow-x:auto">
+            <table class="task-table">
+              <thead><tr><th>任务</th><th>负责人</th><th class="hide-mobile">创建时间</th><th>状态</th></tr></thead>
+              <tbody id="task-rows">
+                <tr><td>Q4 竞品动态周报</td><td><span class="task-owner"><span class="mini-avatar">✦</span>市场洞察员</span></td><td class="hide-mobile">今天 10:12</td><td><span class="status-pill">执行中</span></td></tr>
+                <tr><td>整理客户访谈反馈</td><td><span class="task-owner"><span class="mini-avatar">▧</span>客户成功顾问</span></td><td class="hide-mobile">今天 09:44</td><td><span class="status-pill">已完成</span></td></tr>
+                <tr><td>月度经营数据汇总</td><td><span class="task-owner"><span class="mini-avatar">⌁</span>数据分析师</span></td><td class="hide-mobile">今天 09:30</td><td><span class="status-pill pending">待处理</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <footer class="footer">TransWork · 企业专属的 Agent 工作体系</footer>
+      </main>
+    </div>
+
+    <dialog id="task-dialog" aria-labelledby="dialog-title">
+      <form class="dialog-content" id="task-form">
+        <h2 id="dialog-title">创建团队任务</h2>
+        <p>把目标交给合适的智能体，过程和结果都留在工作空间。</p>
+        <div class="field"><label for="task-name">任务名称</label><input id="task-name" name="taskName" required maxlength="80" placeholder="例如：整理本周客户反馈"></div>
+        <div class="field"><label for="task-agent">分配给</label><select id="task-agent" name="agent"><option>市场洞察员</option><option>客户成功顾问</option><option>数据分析师</option><option>品牌内容编辑</option></select></div>
+        <div class="dialog-actions"><button class="secondary-button" type="button" id="cancel-task">取消</button><button class="primary-button" type="submit">创建任务</button></div>
+      </form>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script>
+      const dialog = document.querySelector("#task-dialog");
+      const taskForm = document.querySelector("#task-form");
+      const taskRows = document.querySelector("#task-rows");
+      const toast = document.querySelector("#toast");
+      let toastTimeout;
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add("visible");
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.remove("visible"), 2400);
+      }
+
+      document.querySelector("#open-task").addEventListener("click", () => dialog.showModal());
+      document.querySelector("#cancel-task").addEventListener("click", () => dialog.close());
+      document.querySelectorAll("[data-toast]").forEach((button) => {
+        button.addEventListener("click", () => showToast(button.dataset.toast));
+      });
+      taskForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const name = taskForm.elements.taskName.value.trim();
+        const agent = taskForm.elements.agent.value;
+        if (!name) return;
+        const row = document.createElement("tr");
+        const taskCell = document.createElement("td");
+        taskCell.textContent = name;
+        const ownerCell = document.createElement("td");
+        const owner = document.createElement("span");
+        owner.className = "task-owner";
+        const avatar = document.createElement("span");
+        avatar.className = "mini-avatar";
+        avatar.textContent = "◇";
+        owner.append(avatar, document.createTextNode(agent));
+        ownerCell.append(owner);
+        const createdCell = document.createElement("td");
+        createdCell.className = "hide-mobile";
+        createdCell.textContent = "刚刚";
+        const statusCell = document.createElement("td");
+        const status = document.createElement("span");
+        status.className = "status-pill pending";
+        status.textContent = "待处理";
+        statusCell.append(status);
+        row.append(taskCell, ownerCell, createdCell, statusCell);
+        taskRows.prepend(row);
+        dialog.close();
+        taskForm.reset();
+        showToast("任务已加入团队工作队列");
+      });
+      document.querySelectorAll(".nav a").forEach((link) => {
+        link.addEventListener("click", () => {
+          document.querySelectorAll(".nav a").forEach((item) => item.classList.remove("active"));
+          link.classList.add("active");
+        });
+      });
+    </script>
+  </body>
+</html>
