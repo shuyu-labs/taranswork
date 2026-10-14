@@ -4,7 +4,7 @@
 
 Enterprise desktop AI Agent workspace. Self-host the full platform with one command, free for up to 5 seats.
 
-官网：https://tree456.com/
+官网：https://transwork.tree456.com/
 
 ## 为什么选择 TransWork
 
@@ -31,7 +31,7 @@ Enterprise desktop AI Agent workspace. Self-host the full platform with one comm
 - 部署即自带**内置免费授权：5 个席位，无到期时间**，无需注册或导入授权码。
 - 席位在用户首次登录时分配，同一用户重复登录不重复占用；5 席用满后新用户登录会被拒绝。
 - 团队扩大后购买 License 并在「管理后台 → 组织配置 → 授权配置」导入授权码即可扩容；升级到不少于 5 席位的 License 时，现有席位自动迁移，已登录用户无需重新登录。
-- 商业授权与更大规模私有化部署请通过 [官网](https://tree456.com/) 或 [GitHub Issues](https://github.com/shuyu-labs/taranswork/issues) 联系我们。
+- 商业授权与更大规模私有化部署请通过 [官网](https://transwork.tree456.com/) 或 [GitHub Issues](https://github.com/shuyu-labs/taranswork/issues) 联系我们。
 
 ## 快速开始
 
@@ -60,9 +60,9 @@ docker compose up -d
 
 ```mermaid
 flowchart LR
-    U[桌面客户端 / 浏览器] --> W
+    U["桌面客户端 / 浏览器"] --> W
 
-    subgraph Docker Compose
+    subgraph DC["Docker Compose"]
         W["transwork-web :3000<br/>官网 · 管理后台 · 模型网关"]
         F["transwork-fileext :5000<br/>文档解析服务"]
         P[("PostgreSQL + pgvector")]
@@ -70,7 +70,7 @@ flowchart LR
         W --> P
     end
 
-    W --> LLM[外部模型 API]
+    W --> LLM["外部模型 API"]
     F --> FILES["./uploads 与 ./static"]
 ```
 
@@ -98,7 +98,7 @@ flowchart LR
 
 ## 桌面客户端
 
-从官网下载 Windows / macOS 桌面客户端：https://tree456.com/
+从官网下载 Windows / macOS 桌面客户端：https://transwork.tree456.com/
 
 客户端连接你部署的服务端后，即可使用技能市场、数字员工与知识库；SSO 登录方式会在客户端登录页自动发现，无需把平台密钥写入客户端。
 
@@ -129,4 +129,4 @@ docker compose pull && docker compose up -d   # 升级到最新镜像
 ## 支持
 
 - 问题反馈与功能建议：[GitHub Issues](https://github.com/shuyu-labs/taranswork/issues)
-- 商业授权、私有化部署咨询：[官网](https://tree456.com/)
+- 商业授权、私有化部署咨询：[官网](https://transwork.tree456.com/)
