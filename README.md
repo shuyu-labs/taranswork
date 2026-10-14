@@ -2,8 +2,6 @@
 
 企业级桌面 AI Agent 工作台 —— 让技能（Skills）、知识库与数字员工（Digital Employees）在同一处协作。
 
-Enterprise desktop AI Agent workspace. Self-host the full platform with one command, free for up to 5 seats.
-
 官网：https://transwork.tree456.com/
 
 ## 为什么选择 TransWork
@@ -58,6 +56,11 @@ docker compose up -d
 
 ## 架构
 
+![TransWork 架构](assets/architecture.png)
+
+<details>
+<summary>查看 Mermaid 源码</summary>
+
 ```mermaid
 flowchart LR
     U["桌面客户端 / 浏览器"] --> W
@@ -73,6 +76,8 @@ flowchart LR
     W --> LLM["外部模型 API"]
     F --> FILES["./uploads 与 ./static"]
 ```
+
+</details>
 
 - 业务数据保存在命名卷 `transwork-postgres-data`，网站文件资产（Skill 包、Logo、机器码等）保存在命名卷 `transwork-data`。
 - 容器会挂载宿主机 `/etc/machine-id` 与 `/sys/class/dmi/id/product_uuid` 生成稳定的系统识别码，授权码绑定该识别码。
