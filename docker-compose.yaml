@@ -1,0 +1,103 @@
+version: "2.4"
+
+# TransWork 演示环境
+# 启动：docker-compose up -d
+# 管理后台：http://localhost:3000/admin
+#
+# 这里的账号密码仅用于演示环境，请勿直接用于生产部署。
+services:
+  transwork-web:
+    image: registry.cn-hangzhou.aliyuncs.com/tree456/transwork-web:1.0.0
+    container_name: transwork-web
+    restart: unless-stopped
+    ports:
+      - "${PATH2AI_HTTP_PORT}:3000"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "3000"
+      PATH2AI_ROOT_DIR: /workspace/website
+      PATH2AI_DEPLOYMENT_MODE: development
+      PATH2AI_DEPLOYMENT_TOPOLOGY: single
+      PATH2AI_SHARED_STATE_DRIVER: memory
+      PATH2AI_PROCESS_ROLE: all
+      PATH2AI_INSTANCE_ID: transwork-demo
+      PATH2AI_BASE_PATH: /
+      PATH2AI_PUBLIC_BASE_URL: "${PATH2AI_PUBLIC_BASE_URL}"
+
+      # 演示环境后台管理员账号
+      PATH2AI_ADMIN_USERNAME: "${PATH2AI_ADMIN_USERNAME}"
+      PATH2AI_ADMIN_PASSWORD: "${PATH2AI_ADMIN_PASSWORD}"
+      PATH2AI_ADMIN_SESSION_HOURS: "${PATH2AI_ADMIN_SESSION_HOURS}"
+
+      # PostgreSQL 连接配置
+      PATH2AI_DATABASE_DRIVER: postgres
+      PATH2AI_POSTGRES_CONNECTION_LIMIT: "10"
+      PATH2AI_POSTGRES_CONNECTION_STRING: "${PATH2AI_POSTGRES_CONNECTION_STRING}"
+      PATH2AI_POSTGRES_SCHEMA: public
+      PATH2AI_POSTGRES_TABLE_PREFIX: transwork
+
+      # 模型网关密钥必须至少 32 个字符
+      PATH2AI_MODEL_GATEWAY_MASTER_KEY: "${PATH2AI_MODEL_GATEWAY_MASTER_KEY}"
+
+      # 知识库文档解析服务
+      # Web 容器通过 Compose 内网服务名访问解析服务。
+      FILE_EXTRACTION_BASE_URL: "${FILE_EXTRACTION_BASE_URL}"
+      FILE_EXTRACTION_SERVICE_TOKEN: "${FILE_EXTRACTION_SERVICE_TOKEN}"
+      FILE_EXTRACTION_TIMEOUT_MS: "${FILE_EXTRACTION_TIMEOUT_MS}"
+      PATH2AI_KNOWLEDGE_WORKER_ENABLED: "true"
+      PATH2AI_KNOWLEDGE_MALWARE_SCAN_ENABLED: "false"
+
+      # pgvector 初始化脚本使用具备创建扩展权限的数据库账号
+      PATH2AI_POSTGRES_ADMIN_CONNECTION_STRING: "${PATH2AI_POSTGRES_ADMIN_CONNECTION_STRING}"
+      PATH2AI_POSTGRES_INIT_TIMEOUT_MS: "${PATH2AI_POSTGRES_INIT_TIMEOUT_MS}"
+    volumes:
+      - transwork-data:/workspace/website/data
+      - /etc/machine-id:/run/path2ai-host-machine-id:ro
+      - /sys/class/dmi/id/product_uuid:/run/path2ai-host-product-uuid:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      fileext:
+        condition: service_started
+    # 先注册 pgvector，再启动 Web。CREATE EXTENSION IF NOT EXISTS 可重复执行。
+    command: ["sh", "-c", "node scripts/ensure-pgvector.cjs && exec node server.cjs"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/readyz').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  fileext:
+    image: registry.cn-hangzhou.aliyuncs.com/tree456/transwork-fileext:1.0.0
+    container_name: transwork-fileext
+    ports:
+      - "${FILEEXT_HTTP_PORT}:5000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./static:/app/static
+    environment:
+      IMAGE_BASE_URL: "${FILEEXT_IMAGE_BASE_URL}"
+    restart: unless-stopped
+
+  postgres:
+    image: registry.cn-hangzhou.aliyuncs.com/tree456/pg:v0.5.0
+    container_name: transwork-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB}"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    volumes:
+      - transwork-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+volumes:
+  transwork-data:
+  transwork-postgres-data:
