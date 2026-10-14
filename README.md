@@ -98,7 +98,9 @@ flowchart LR
 
 ## 桌面客户端
 
-从官网下载 Windows / macOS 桌面客户端：https://transwork.tree456.com/
+**网盘下载（夸克）**：https://pan.quark.cn/s/4b30591299e1 ，提取码：`8kb8`
+
+也可在官网获取：https://transwork.tree456.com/
 
 客户端连接你部署的服务端后，即可使用技能市场、数字员工与知识库；SSO 登录方式会在客户端登录页自动发现，无需把平台密钥写入客户端。
 
