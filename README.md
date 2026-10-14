@@ -128,7 +128,13 @@ docker compose pull && docker compose up -d   # 升级到最新镜像
 
 数据备份：业务数据在卷 `transwork-postgres-data`，文件资产在卷 `transwork-data`，升级前建议先备份。
 
-## 支持
+## 交流与支持
+
+欢迎扫码加入微信交流群，或添加作者微信反馈问题、交流使用心得：
+
+| 交流群 | 作者微信 |
+| --- | --- |
+| <img src="assets/group-qrcode.jpg" width="220" /> | <img src="assets/qrcode.jpg" width="220" /> |
 
 - 问题反馈与功能建议：[GitHub Issues](https://github.com/shuyu-labs/taranswork/issues)
 - 商业授权、私有化部署咨询：[官网](https://transwork.tree456.com/)
