@@ -58,27 +58,6 @@ docker compose up -d
 
 ![TransWork 架构](assets/architecture.png)
 
-<details>
-<summary>查看 Mermaid 源码</summary>
-
-```mermaid
-flowchart LR
-    U["桌面客户端 / 浏览器"] --> W
-
-    subgraph DC["Docker Compose"]
-        W["transwork-web :3000<br/>官网 · 管理后台 · 模型网关"]
-        F["transwork-fileext :5000<br/>文档解析服务"]
-        P[("PostgreSQL + pgvector")]
-        W --> F
-        W --> P
-    end
-
-    W --> LLM["外部模型 API"]
-    F --> FILES["./uploads 与 ./static"]
-```
-
-</details>
-
 - 业务数据保存在命名卷 `transwork-postgres-data`，网站文件资产（Skill 包、Logo、机器码等）保存在命名卷 `transwork-data`。
 - 容器会挂载宿主机 `/etc/machine-id` 与 `/sys/class/dmi/id/product_uuid` 生成稳定的系统识别码，授权码绑定该识别码。
 - 所有镜像托管在阿里云容器镜像服务（ACR），国内服务器拉取速度快。
@@ -132,6 +111,14 @@ docker compose pull && docker compose up -d   # 升级到最新镜像
 ```
 
 数据备份：业务数据在卷 `transwork-postgres-data`，文件资产在卷 `transwork-data`，升级前建议先备份。
+
+## 文档与手册
+
+| 文档 | 适合谁看 | 内容 |
+| --- | --- | --- |
+| [TransWork 平台操作手册（零基础版）](docs/TransWork%20平台操作手册（零基础版）.pdf) | 企业管理员与业务人员 | 102 页图文全流程：官网展示、后台登录、用户管理、智能体员工、AI 资源管理、知识库、数据驾驶舱、安全与系统设置 |
+| [TransWork 客户端用户操作手册](docs/TransWork客户端用户操作手册.pdf) | 终端用户 | 73 页零基础图文：安装登录、对话使用、AI 员工、任务日历、技能中心、连接器、知识库与常见问题 |
+| [后台网站 Docker 部署操作手册](docs/后台网站Docker部署操作手册.md) | 运维 / 部署人员 | 首次部署、数据迁移、备份与恢复完整流程 |
 
 ## 交流与支持
 
