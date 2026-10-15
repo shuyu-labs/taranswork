@@ -29,7 +29,7 @@
 - 部署即自带**内置免费授权：5 个席位，无到期时间**，无需注册或导入授权码。
 - 席位在用户首次登录时分配，同一用户重复登录不重复占用；5 席用满后新用户登录会被拒绝。
 - 团队扩大后购买 License 并在「管理后台 → 组织配置 → 授权配置」导入授权码即可扩容；升级到不少于 5 席位的 License 时，现有席位自动迁移，已登录用户无需重新登录。
-- 商业授权与更大规模私有化部署请通过 [官网](https://transwork.tree456.com/) 或 [GitHub Issues](https://github.com/shuyu-labs/taranswork/issues) 联系我们。
+- 商业授权与更大规模私有化部署请通过 [官网](https://transwork.tree456.com/) 或 [GitHub Issues](https://github.com/shuyu-labs/transwork/issues) 联系我们。
 
 ## 在线体验（无需部署）
 
@@ -54,8 +54,8 @@
 > 以下命令在仓库根目录执行。
 
 ```bash
-git clone git@github.com:shuyu-labs/taranswork.git
-cd taranswork
+git clone git@github.com:shuyu-labs/transwork.git
+cd transwork
 docker compose up -d
 ```
 
@@ -145,5 +145,5 @@ docker compose pull && docker compose up -d   # 升级到最新镜像
 | --- | --- |
 | <img src="assets/group-qrcode.jpg" width="220" /> | <img src="assets/qrcode.jpg" width="220" /> |
 
-- 问题反馈与功能建议：[GitHub Issues](https://github.com/shuyu-labs/taranswork/issues)
+- 问题反馈与功能建议：[GitHub Issues](https://github.com/shuyu-labs/transwork/issues)
 - 商业授权、私有化部署咨询：[官网](https://transwork.tree456.com/)
